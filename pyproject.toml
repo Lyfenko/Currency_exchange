@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "currency-exchange"
+version = "0.1.0"
+description = ""
+authors = ["Dmytro Lyfenko <114363730+Lyfenko@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "currency_exchange"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiohttp = "^3.8.4"
+prettytable = "^3.6.0"
+requests = "^2.28.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
