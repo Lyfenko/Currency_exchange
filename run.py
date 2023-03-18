@@ -1,15 +1,16 @@
 import aiohttp
 import asyncio
+import sys
 import json
 from datetime import datetime, timedelta
 
 
 class ExchangeRates:
     BASE_URL = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5&date="
-    CURRENCY_CODES = ["USD", "EUR"]
     DATE_RANGE = 10
 
-    def __init__(self):
+    def __init__(self, currency_codes):
+        self.currency_codes = currency_codes
         self.session = aiohttp.ClientSession()
 
     async def fetch(self, url):
@@ -28,7 +29,7 @@ class ExchangeRates:
             response_text = await self.fetch(url)
             response_json = json.loads(response_text)
             for currency in response_json:
-                if currency["ccy"] in self.CURRENCY_CODES:
+                if currency["ccy"] in self.currency_codes:
                     print(
                         f'{date:%d.%m.%Y},Курс {currency["ccy"]}:\n Продаж {currency["sale"]} Купівля {currency["buy"]}'
                     )
@@ -38,7 +39,10 @@ class ExchangeRates:
 
 
 async def main():
-    exchange_rates = ExchangeRates()
+    currency_codes = ["USD", "EUR"]  # валюти за замовчуванням
+    if len(sys.argv) > 1:
+        currency_codes = sys.argv[1:]
+    exchange_rates = ExchangeRates(currency_codes)
     try:
         days = int(input("Введіть кількість днів для виводу курсу валют: "))
         await exchange_rates.get_rates(days)
