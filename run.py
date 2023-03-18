@@ -18,9 +18,11 @@ class ExchangeRates:
                 raise ValueError(f"Error fetching {url}: status code {response.status}")
             return await response.text()
 
-    async def get_rates(self):
+    async def get_rates(self, days=10):
+        if days > self.DATE_RANGE:
+            raise ValueError(f"Error: The number of days cannot exceed {self.DATE_RANGE}")
         today = datetime.now()
-        date_range = [today - timedelta(days=x) for x in range(self.DATE_RANGE)]
+        date_range = [today - timedelta(days=x) for x in range(days)]
         for date in date_range:
             url = f'{self.BASE_URL}{date.strftime("%d.%m.%Y")}'
             response_text = await self.fetch(url)
@@ -38,7 +40,17 @@ class ExchangeRates:
 async def main():
     exchange_rates = ExchangeRates()
     try:
-        await exchange_rates.get_rates()
+        days = int(input("Введіть кількість днів для виводу курсу валют: "))
+        await exchange_rates.get_rates(days)
+        print("Введіть команду exit, щоб вийти з програми.")
+        while True:
+            user_input = input()
+            if user_input.lower() == "exit":
+                break
+            else:
+                print("Невідома команда. Доступна тільки команда exit.")
+    except ValueError as e:
+        print(e)
     finally:
         await exchange_rates.close()
 
