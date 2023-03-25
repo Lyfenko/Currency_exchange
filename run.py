@@ -21,7 +21,9 @@ class ExchangeRates:
 
     async def get_rates(self, days=10):
         if days > self.DATE_RANGE:
-            raise ValueError(f"Error: The number of days cannot exceed {self.DATE_RANGE}")
+            raise ValueError(
+                f"Error: The number of days cannot exceed {self.DATE_RANGE}"
+            )
         today = datetime.now()
         date_range = [today - timedelta(days=x) for x in range(days)]
         for date in date_range:
@@ -31,7 +33,9 @@ class ExchangeRates:
             for currency in response_json:
                 if currency["ccy"] in self.currency_codes:
                     print(
-                        f'{date:%d.%m.%Y},Курс {currency["ccy"]}:\n Продаж {currency["sale"]} Купівля {currency["buy"]}'
+                        f'{date:%d.%m.%Y},Курс {currency["ccy"]}:\n '
+                        f'Продаж {round(float(currency["sale"]), 2)} {currency["base_ccy"]} '
+                        f'Купівля {round(float(currency["buy"]), 2)} {currency["base_ccy"]}'
                     )
 
     async def close(self):
@@ -44,15 +48,26 @@ async def main():
         currency_codes = sys.argv[1:]
     exchange_rates = ExchangeRates(currency_codes)
     try:
-        days = int(input("Введіть кількість днів для виводу курсу валют: "))
-        await exchange_rates.get_rates(days)
-        print("Введіть команду exit, щоб вийти з програми.")
         while True:
-            user_input = input()
-            if user_input.lower() == "exit":
-                break
-            else:
-                print("Невідома команда. Доступна тільки команда exit.")
+            days = int(input("Введіть кількість днів для виводу курсу валют: "))
+            await exchange_rates.get_rates(days)
+            print("Введіть команду exit, щоб вийти з програми.")
+            while True:
+                user_input = input()
+                if user_input.lower() == "exit":
+                    return
+                else:
+                    try:
+                        days = int(user_input)
+                        await exchange_rates.get_rates(days)
+                        print(
+                            """Введіть команду exit, щоб вийти з програми.
+Введіть повторно кількість днів для виводу курсу валют"""
+                        )
+                    except ValueError:
+                        print(
+                            "Невідома команда. Доступна тільки команда exit та кількість днів для виводу курсу валют."
+                        )
     except ValueError as e:
         print(e)
     finally:
